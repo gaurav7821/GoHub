@@ -1,12 +1,17 @@
 package com.gohub.user.controller;
 
+import com.gohub.security.service.JwtService;
+import com.gohub.user.dto.LoginRequest;
+import com.gohub.user.dto.LoginResponse;
 import com.gohub.user.dto.UserRequest;
 import com.gohub.user.dto.UserResponse;
 import com.gohub.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,9 +19,16 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-    public AuthController(UserService userService){
+    public AuthController(
+            UserService userService,
+            JwtService jwtService,
+            AuthenticationManager authenticationManager){
         this.userService = userService;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
 
     @GetMapping("/test")
@@ -31,5 +43,26 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
+
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getEmail(),
+                                request.getPassword()
+                        )
+                );
+
+        String token =
+                jwtService.generateToken(
+                        authentication.getName()
+                );
+
+        return ResponseEntity.ok(
+                new LoginResponse(token, "Bearer")
+        );
     }
 }
