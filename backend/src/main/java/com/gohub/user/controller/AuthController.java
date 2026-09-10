@@ -31,11 +31,6 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
     }
 
-    @GetMapping("/test")
-        public String greet(){
-            return "hello";
-        }
-
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid
                                                  @RequestBody UserRequest request){

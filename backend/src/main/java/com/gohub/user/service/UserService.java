@@ -1,5 +1,7 @@
 package com.gohub.user.service;
 
+import com.gohub.exception.DuplicateResourceException;
+import com.gohub.exception.ResourceNotFoundException;
 import com.gohub.user.dto.UserRequest;
 import com.gohub.user.dto.UserResponse;
 import com.gohub.user.entity.User;
@@ -27,7 +29,9 @@ public class UserService {
     public UserResponse userRegister(UserRequest request){
 
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email already registered");
+            throw new DuplicateResourceException(
+                    "User already registered with email: " + request.getEmail()
+            );
         }
 
         User user = userMapper.toEntity(request);
@@ -37,6 +41,16 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         return userMapper.toResponce(savedUser);
+    }
+
+    public UserResponse getUserProfile(String email){
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new ResourceNotFoundException(
+                        "User not found with Email: " + email
+                ));
+
+        return userMapper.toResponce(user);
     }
 
 
