@@ -5,7 +5,7 @@ import com.gohub.user.dto.LoginRequest;
 import com.gohub.user.dto.LoginResponse;
 import com.gohub.user.dto.UserRequest;
 import com.gohub.user.dto.UserResponse;
-import com.gohub.user.service.UserService;
+import com.gohub.user.service.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthController(
-            UserService userService,
+            UserServiceImpl userServiceImpl,
             JwtService jwtService,
             AuthenticationManager authenticationManager){
-        this.userService = userService;
+        this.userServiceImpl = userServiceImpl;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
@@ -34,7 +34,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid
                                                  @RequestBody UserRequest request){
-        UserResponse response = userService.userRegister(request);
+        UserResponse response = userServiceImpl.userRegister(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
